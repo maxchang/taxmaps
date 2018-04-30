@@ -18,17 +18,15 @@
 ################################################################################
 
 
-
 ################################################################################
 ### MODULES ####################################################################
 
 from optparse import OptionParser
 import sys
-import Queue
+import queue
 
 ################################################################### /MODULES ###
 ################################################################################
-
 
 
 ################################################################################
@@ -38,17 +36,15 @@ import Queue
 ################################################################################
 
 
-
 ################################################################################
 ### ARGUMENTS,OPTIONS ##########################################################
 
-parser = OptionParser(usage = "\n%prog [options] [map files...]", version = "%prog v0.2")
+parser = OptionParser(usage="\n%prog [options] [map files...]", version="%prog v0.2")
 
 (opt, args) = parser.parse_args()
-        
+
 ######################################################### /ARGUMENTS,OPTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -58,80 +54,73 @@ parser = OptionParser(usage = "\n%prog [options] [map files...]", version = "%pr
 ################################################################################
 
 
-
-
 ################################################################################
 ### MAIN #######################################################################
 
 if __name__ == "__main__":
-	file_l = sys.argv[1:]
-	file_n = len(file_l)
-	hand_l = []
-	for f in file_l:
-		hand_l.append(open(f, 'r'))
+    file_l = sys.argv[1:]
+    file_n = len(file_l)
+    hand_l = []
+    for f in file_l:
+        hand_l.append(open(f, 'r'))
 
-	line_q = Queue.Queue(2*file_n)
-	wait_l = []
-	closed = []
-	for x in xrange(file_n):
-		closed.append(0)
-		l = hand_l[x].readline()
-		if l:
-			p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
-			p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
-			line_q.put((x, p_id, l, p_ind))
-		else:
-			closed[x] = 1
-		l = hand_l[x].readline()
-		if l:
-			p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
-			p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
-			line_q.put((x, p_id, l, p_ind))
-		else:
-			closed[x] = 1
-		wait_l.append(None)
+    line_q = queue.Queue(2 * file_n)
+    wait_l = []
+    closed = []
+    for x in range(file_n):
+        closed.append(0)
+        l = hand_l[x].readline()
+        if l:
+            p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
+            p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
+            line_q.put((x, p_id, l, p_ind))
+        else:
+            closed[x] = 1
+        l = hand_l[x].readline()
+        if l:
+            p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
+            p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
+            line_q.put((x, p_id, l, p_ind))
+        else:
+            closed[x] = 1
+        wait_l.append(None)
 
+    while not line_q.empty() or sum(closed) != file_n:
+        r = line_q.get()
+        rx = r[0]
 
-	while not line_q.empty() or sum(closed) != file_n:
-		r = line_q.get()
-		rx = r[0]
+        m = None
+        e = False
+        for x in range(file_n):
+            if wait_l[x] != None and r[1] == wait_l[x][1]:
+                m = x
+            if wait_l[x] == None and x == rx:
+                e = True
 
-		m = None
-		e = False 
-		for x in xrange(file_n):
-			if wait_l[x] != None and r[1] == wait_l[x][1]:
-				m = x
-			if wait_l[x] == None and x == rx:
-				e = True
+        if m != None:
+            for ol in sorted([wait_l[m], r], key=lambda x: x[3]):
+                sys.stdout.write(ol[2])
+                sys.stderr.write(ol[2])
+            wait_l[m] = None
+            l = hand_l[m].readline()
+            if l:
+                p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
+                p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
+                line_q.put((m, p_id, l, p_ind))
+            else:
+                closed[m] = 1
 
-		if m != None:
-			for ol in sorted([wait_l[m], r], key = lambda x: x[3]):
-				sys.stdout.write(ol[2])
-				sys.stderr.write(ol[2])
-			wait_l[m] = None
-			l = hand_l[m].readline()
-			if l:
-				p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
-				p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
-				line_q.put((m, p_id, l, p_ind))
-			else:
-				closed[m] = 1
-
-			l = hand_l[rx].readline()
-			if l:
-				p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
-				p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
-				line_q.put((rx, p_id, l, p_ind))
-			else:
-				closed[rx] = 1
-		elif m == None and e:
-			wait_l[rx] = r
-		else:
-			line_q.put(r)
-		
-
-
-
+            l = hand_l[rx].readline()
+            if l:
+                p_id = l.split('\t')[0].replace(' ', '/').split('/')[0]
+                p_ind = l.split('\t')[0].replace(' ', '/').split('/')[1][0]
+                line_q.put((rx, p_id, l, p_ind))
+            else:
+                closed[rx] = 1
+        elif m == None and e:
+            wait_l[rx] = r
+        else:
+            line_q.put(r)
 
 ###################################################################### /MAIN ###
 ################################################################################

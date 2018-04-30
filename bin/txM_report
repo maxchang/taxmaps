@@ -18,7 +18,6 @@
 ################################################################################
 
 
-
 ################################################################################
 ### MODULES ####################################################################
 
@@ -30,13 +29,11 @@ import math, os
 ################################################################################
 
 
-
 ################################################################################
 ### FUNCTIONS ##################################################################
 
 ################################################################# /FUNCTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -45,59 +42,58 @@ import math, os
 parser = OptionParser(usage="\n%prog -t tax file", version="%prog v0.2")
 
 parser.add_option(
-	"-i",
-	metavar = "FILE",
-	type = "string",
-	dest = "rep_file",
-	default = 'stdin',
-	help = "Input mapping summary file (default = 'stdin')"
-	)
+    "-i",
+    metavar="FILE",
+    type="string",
+    dest="rep_file",
+    default='stdin',
+    help="Input mapping summary file (default = 'stdin')"
+)
 
 parser.add_option(
-	"-t",
-	metavar = "FILE",
-	type = "string",
-	dest = "tax_file",
-	default = None,
-	help = "Taxonomic table file (Mandatory)"
-	)
+    "-t",
+    metavar="FILE",
+    type="string",
+    dest="tax_file",
+    default=None,
+    help="Taxonomic table file (Mandatory)"
+)
 
 parser.add_option(
-	"-c",
-	metavar = "FLOAT",
-	type = "float",
-	dest = "cutoff",
-	default = 1,
-	help = "Reporting cutoff (if < 1: minimum fraction from the total number reads or pairs ; if >= 1: minimum number of reads or pairs; default = 1)"
-	)
+    "-c",
+    metavar="FLOAT",
+    type="float",
+    dest="cutoff",
+    default=1,
+    help="Reporting cutoff (if < 1: minimum fraction from the total number reads or pairs ; if >= 1: minimum number of reads or pairs; default = 1)"
+)
 
 parser.add_option(
-	"-p",
-	metavar = "FLAG",
-	dest = "paired",
-	action = 'store_true',
-	default = False,
-	help = "Paired LCA determination (only for interleaved input; default = False)"
-	)
+    "-p",
+    metavar="FLAG",
+    dest="paired",
+    action='store_true',
+    default=False,
+    help="Paired LCA determination (only for interleaved input; default = False)"
+)
 
 parser.add_option(
-	"-o",
-	metavar = "FILE",
-	type = "string",
-	dest = "out_prefix",
-	default = None,
-	help = "Output prefix (Mandatory)"
-	)
+    "-o",
+    metavar="FILE",
+    type="string",
+    dest="out_prefix",
+    default=None,
+    help="Output prefix (Mandatory)"
+)
 
 (opt, args) = parser.parse_args()
 
 if opt.tax_file == None or opt.out_prefix == None:
-	parser.print_help()
-	exit(-1)
-     
+    parser.print_help()
+    exit(-1)
+
 ######################################################### /ARGUMENTS,OPTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -107,77 +103,78 @@ if opt.tax_file == None or opt.out_prefix == None:
 ################################################################################
 
 
-
 ################################################################################
 ### MAIN #######################################################################
 
 if __name__ == '__main__':
- 	# read tax info
-	tax_d = {}
-	tax_file = open(opt.tax_file, 'r')	
-	for l in tax_file:
-		la = l.strip().split('\t')
-		la[2] = la[2].replace(':','-')
-		la[3] = la[3].split(':')
-		tax_d[la[0]] = la + [0, 0, 0]
-	tax_file.close()
-	tax_d['0'] = ['0', 'no rank', 'Unclassified', ['0'], 0, 0, 0]
-	tax_d['1'] = ['1', 'no rank', 'Classified', ['1'], 0, 0, 0]
-	tax_d['-'] = ['-', 'no rank', 'Filtered out', ['0','-'], 0, 0, 0]
-	
-	
-	# read rep file
-	if opt.rep_file != 'stdin':
-		rep_file = open(opt.rep_file, 'r')
-	else:
-		rep_file = stdin
-	for l in rep_file:
-		la = l.strip().split('\t')
-		tax_id = la[0] 
-		path = tax_d[tax_id][3]
-		if opt.paired:
-			counts = int(la[7]) + int(la[8])
-		else:
-			counts = int(la[4])
-		tax_d[tax_id][4] = counts
-		for node in path:
-			tax_d[node][5] += counts
-			tax_d[node][6] += counts
-	if opt.rep_file != 'stdin':
-		rep_file.close()
-	
-	reads_n = tax_d['1'][5] + tax_d['0'][5]	
+    # read tax info
+    tax_d = {}
+    tax_file = open(opt.tax_file, 'r')
+    for l in tax_file:
+        la = l.strip().split('\t')
+        la[2] = la[2].replace(':', '-')
+        la[3] = la[3].split(':')
+        tax_d[la[0]] = la + [0, 0, 0]
+    tax_file.close()
+    tax_d['0'] = ['0', 'no rank', 'Unclassified', ['0'], 0, 0, 0]
+    tax_d['1'] = ['1', 'no rank', 'Classified', ['1'], 0, 0, 0]
+    tax_d['-'] = ['-', 'no rank', 'Filtered out', ['0', '-'], 0, 0, 0]
 
-	if opt.cutoff < 1:
-		min_c = max([1, int(opt.cutoff*reads_n)])
-	else:
-		min_c = opt.cutoff
-	
-	for tax_id in tax_d:
-		tax_d[tax_id][6] -= tax_d[tax_id][4]
-		path = tax_d[tax_id][3]
-		if tax_d[tax_id][5] >= min_c and len(path) > 1 :
-			tax_d[path[-2]][6] -= tax_d[tax_id][5]
+    # read rep file
+    if opt.rep_file != 'stdin':
+        rep_file = open(opt.rep_file, 'r')
+    else:
+        rep_file = stdin
+    for l in rep_file:
+        la = l.strip().split('\t')
+        tax_id = la[0]
+        path = tax_d[tax_id][3]
+        if opt.paired:
+            counts = int(la[7]) + int(la[8])
+        else:
+            counts = int(la[4])
+        tax_d[tax_id][4] = counts
+        for node in path:
+            tax_d[node][5] += counts
+            tax_d[node][6] += counts
+    if opt.rep_file != 'stdin':
+        rep_file.close()
 
+    reads_n = tax_d['1'][5] + tax_d['0'][5]
 
-	# output
-	out_tbl = open(opt.out_prefix + '.tbl', 'w')
-	out_krona = open(opt.out_prefix + '.krona.tree', 'w')
-	
-	for tax_id in sorted(tax_d.keys(), key = lambda x : [int(y.replace('-', '0')) for y in tax_d[x][3]]):
-		if tax_d[tax_id][5] >= min_c:
-			perc = float(tax_d[tax_id][5]) * 100 / reads_n
-			out_tbl.write('\t'.join(tax_d[tax_id][:2] + [str(len(tax_d[tax_id][3])), ':'.join(tax_d[tax_id][3]), tax_d[tax_id][2], str(tax_d[tax_id][5]), str(perc)]) + '\n')
-			
-			if tax_d[tax_id][4]:
-				out_krona.write('\t'.join([str(tax_d[tax_id][4])] + [tax_d[x][2] for x in tax_d[tax_id][3]]) + '\n')
-			if tax_d[tax_id][6]:
-				out_krona.write('\t'.join([str(tax_d[tax_id][6])] + [tax_d[x][2] for x in tax_d[tax_id][3]]+ ['Other']) + '\n')
-				
-	out_tbl.close()
-	out_krona.close()
+    if opt.cutoff < 1:
+        min_c = max([1, int(opt.cutoff * reads_n)])
+    else:
+        min_c = opt.cutoff
 
-	os.system('ktImportText -o ' + opt.out_prefix + '.krona.html -n ' + opt.out_prefix + ' ' + opt.out_prefix + '.krona.tree')
+    for tax_id in tax_d:
+        tax_d[tax_id][6] -= tax_d[tax_id][4]
+        path = tax_d[tax_id][3]
+        if tax_d[tax_id][5] >= min_c and len(path) > 1:
+            tax_d[path[-2]][6] -= tax_d[tax_id][5]
+
+    # output
+    out_tbl = open(opt.out_prefix + '.tbl', 'w')
+    out_krona = open(opt.out_prefix + '.krona.tree', 'w')
+
+    for tax_id in sorted(list(tax_d.keys()), key=lambda x: [int(y.replace('-', '0')) for y in tax_d[x][3]]):
+        if tax_d[tax_id][5] >= min_c:
+            perc = float(tax_d[tax_id][5]) * 100 / reads_n
+            out_tbl.write('\t'.join(
+                tax_d[tax_id][:2] + [str(len(tax_d[tax_id][3])), ':'.join(tax_d[tax_id][3]), tax_d[tax_id][2],
+                                     str(tax_d[tax_id][5]), str(perc)]) + '\n')
+
+            if tax_d[tax_id][4]:
+                out_krona.write('\t'.join([str(tax_d[tax_id][4])] + [tax_d[x][2] for x in tax_d[tax_id][3]]) + '\n')
+            if tax_d[tax_id][6]:
+                out_krona.write(
+                    '\t'.join([str(tax_d[tax_id][6])] + [tax_d[x][2] for x in tax_d[tax_id][3]] + ['Other']) + '\n')
+
+    out_tbl.close()
+    out_krona.close()
+
+    os.system(
+        'ktImportText -o ' + opt.out_prefix + '.krona.html -n ' + opt.out_prefix + ' ' + opt.out_prefix + '.krona.tree')
 
 ###################################################################### /MAIN ###
 ################################################################################

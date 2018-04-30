@@ -18,7 +18,6 @@
 ################################################################################
 
 
-
 ################################################################################
 ### MODULES ####################################################################
 
@@ -29,13 +28,11 @@ import sys
 ################################################################################
 
 
-
 ################################################################################
 ### FUNCTIONS ##################################################################
 
 ################################################################# /FUNCTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -44,19 +41,18 @@ import sys
 parser = OptionParser(usage="\n%prog [options]", version="%prog v0.2")
 
 parser.add_option(
-	"-i",
-	metavar = "FILE",
-	type = "string",
-	dest = "input_file",
-	default = 'stdin',
-	help = "Input fasta filename (default = 'stdin')"
-	)
+    "-i",
+    metavar="FILE",
+    type="string",
+    dest="input_file",
+    default='stdin',
+    help="Input fasta filename (default = 'stdin')"
+)
 
 (opt, args) = parser.parse_args()
-        
+
 ######################################################### /ARGUMENTS,OPTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -66,33 +62,32 @@ parser.add_option(
 ################################################################################
 
 
-
 ################################################################################
 ### MAIN #######################################################################
 
 if __name__ == "__main__":
-	sid = None
-	length = None
-	
-	if opt.input_file != 'stdin':
-		ff = open(opt.input_file, 'r')
-	else:
-		ff = sys.stdin
-	for line in ff:
-		l = line.rstrip()
-		if l != '':
-			if l[0] == '>':
-				if sid != None:
-					sys.stdout.write(sid + '\t' + str(length) + '\n')
-				sid = l[1:]
-				length = 0
-			else:
-				length += len(l)
-		else:
-			continue
-	sys.stdout.write(sid + '\t' + str(length) + '\n')	
-	if opt.input_file != 'stdin':
-		ff.close()
-	
+    sid = None
+    length = None
+
+    if opt.input_file != 'stdin':
+        ff = open(opt.input_file, 'r')
+    else:
+        ff = sys.stdin
+    for line in ff:
+        l = line.rstrip()
+        if l != '':
+            if l[0] == '>':
+                if sid != None:
+                    sys.stdout.write(sid + '\t' + str(length) + '\n')
+                sid = l[1:]
+                length = 0
+            else:
+                length += len(l)
+        else:
+            continue
+    sys.stdout.write(sid + '\t' + str(length) + '\n')
+    if opt.input_file != 'stdin':
+        ff.close()
+
 ###################################################################### /MAIN ###
 ################################################################################

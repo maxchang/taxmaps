@@ -18,7 +18,6 @@
 ################################################################################
 
 
-
 ################################################################################
 ### MODULES ####################################################################
 
@@ -26,30 +25,30 @@ from optparse import OptionParser
 from sys import stdin, stdout, stderr, exit
 from re import findall
 
+
 ################################################################### /MODULES ###
 ################################################################################
 
 
-
 ################################################################################
 ### FUNCTIONS ##################################################################
-	
+
 def getdist(aln_str):
-	return sum(int(s) for s in findall(r'(\d+)[\-|\+]', aln_str)) + len(findall(r'[A-z]', aln_str))
+    return sum(int(s) for s in findall(r'(\d+)[\-|\+]', aln_str)) + len(findall(r'[A-z]', aln_str))
 
 
 def rescore(match_str):
-	match_list = match_str.split(',')
-	match_sorted = sorted((getdist(m.split(':')[3]),m) for m in match_list)
-	new_strata = [0] * (match_sorted[-1][0] + 1)
-	for m in match_sorted:
-		new_strata[m[0]] += 1
-	new_match = ','.join(m[1] for m in match_sorted)
-	return ':'.join(str(s) for s in new_strata), new_match
-	
+    match_list = match_str.split(',')
+    match_sorted = sorted((getdist(m.split(':')[3]), m) for m in match_list)
+    new_strata = [0] * (match_sorted[-1][0] + 1)
+    for m in match_sorted:
+        new_strata[m[0]] += 1
+    new_match = ','.join(m[1] for m in match_sorted)
+    return ':'.join(str(s) for s in new_strata), new_match
+
+
 ################################################################# /FUNCTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -58,19 +57,18 @@ def rescore(match_str):
 parser = OptionParser(usage="\n%prog -t tax file", version="%prog v0.2")
 
 parser.add_option(
-	"-i",
-	metavar = "FILE",
-	type = "string",
-	dest = "map_file",
-	default = 'stdin',
-	help="Input GEM alignment file (default = 'stdin')"
-	)
+    "-i",
+    metavar="FILE",
+    type="string",
+    dest="map_file",
+    default='stdin',
+    help="Input GEM alignment file (default = 'stdin')"
+)
 
 (opt, args) = parser.parse_args()
-     
+
 ######################################################### /ARGUMENTS,OPTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -80,26 +78,25 @@ parser.add_option(
 ################################################################################
 
 
-
 ################################################################################
 ### MAIN #######################################################################
 
 if __name__ == '__main__':
-	# read map file
-	if opt.map_file != 'stdin':
-		map_file = open(opt.map_file, 'r')
-	else:
-		map_file = stdin
+    # read map file
+    if opt.map_file != 'stdin':
+        map_file = open(opt.map_file, 'r')
+    else:
+        map_file = stdin
 
-	for l in map_file:
-		rid, seq, qual, strata, match_str = l.strip().split('\t')
-		if match_str != '-' and  match_str != '.':
-			new_strata, new_match = rescore(match_str)
-			stdout.write('\t'.join([rid, seq, qual, new_strata, new_match]) + '\n')
-		else:
-			stdout.write(l)
-	if opt.map_file != 'stdin':
-		map_file.close()
+    for l in map_file:
+        rid, seq, qual, strata, match_str = l.strip().split('\t')
+        if match_str != '-' and match_str != '.':
+            new_strata, new_match = rescore(match_str)
+            stdout.write('\t'.join([rid, seq, qual, new_strata, new_match]) + '\n')
+        else:
+            stdout.write(l)
+    if opt.map_file != 'stdin':
+        map_file.close()
 
 ###################################################################### /MAIN ###
 ################################################################################

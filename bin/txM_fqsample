@@ -18,7 +18,6 @@
 ################################################################################
 
 
-
 ################################################################################
 ### MODULES ####################################################################
 
@@ -27,10 +26,8 @@ import sys
 from random import uniform
 from itertools import islice
 
-
 ################################################################### /MODULES ###
 ################################################################################
-
 
 
 ################################################################################
@@ -40,44 +37,42 @@ from itertools import islice
 ################################################################################
 
 
-
 ################################################################################
 ### ARGUMENTS,OPTIONS ##########################################################
 
 parser = OptionParser(usage="\n%prog [options]", version="%prog v0.2")
 
 parser.add_option(
-	"-i",
-	metavar = "FILE",
-	type = "string",
-	dest = "input_file",
-	default = 'stdin',
-	help = "Input FASTQ file (default = 'stdin')"
-	)
+    "-i",
+    metavar="FILE",
+    type="string",
+    dest="input_file",
+    default='stdin',
+    help="Input FASTQ file (default = 'stdin')"
+)
 
 parser.add_option(
-	"-s",
-	metavar = "FLOAT",
-	type = "float",
-	dest = "prob",
-	default = 1,
-	help = "Sampling probability (default = 1)"
-	)
+    "-s",
+    metavar="FLOAT",
+    type="float",
+    dest="prob",
+    default=1,
+    help="Sampling probability (default = 1)"
+)
 
 parser.add_option(
-	"-p",
-	metavar = "FLAG",
-	dest = "paired",
-	action = 'store_true',
-	default = False,
-	help = "Paired sampling (only for interleaved input; default = False)"
-	)
+    "-p",
+    metavar="FLAG",
+    dest="paired",
+    action='store_true',
+    default=False,
+    help="Paired sampling (only for interleaved input; default = False)"
+)
 
 (opt, args) = parser.parse_args()
 
 ######################################################### /ARGUMENTS,OPTIONS ###
 ################################################################################
-
 
 
 ################################################################################
@@ -87,28 +82,27 @@ parser.add_option(
 ################################################################################
 
 
-
 ################################################################################
 ### MAIN #######################################################################
 
 if __name__ == "__main__":
-	nl = 4
-	if opt.paired:
-		nl = 8
+    nl = 4
+    if opt.paired:
+        nl = 8
 
-	if opt.input_file != 'stdin':
-		fq = open(opt.input_file, 'r')
-	else:
-		fq = sys.stdin
-	while True:
-		u = [line for line in islice(fq, nl)]
-		if not u:
-			break
-		if uniform(0,1) < opt.prob:
-			sys.stdout.write(''.join(u))
+    if opt.input_file != 'stdin':
+        fq = open(opt.input_file, 'r')
+    else:
+        fq = sys.stdin
+    while True:
+        u = [line for line in islice(fq, nl)]
+        if not u:
+            break
+        if uniform(0, 1) < opt.prob:
+            sys.stdout.write(''.join(u))
 
-	if opt.input_file != 'stdin':
-		fq.close()
-	
+    if opt.input_file != 'stdin':
+        fq.close()
+
 ###################################################################### /MAIN ###
 ################################################################################
