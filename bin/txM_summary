@@ -232,7 +232,7 @@ if __name__ == '__main__':
         print_l += [str(x) for x in rep_d[tax][:3]]
         print_l.append(str(rep_d[tax][3] / 2))
         print_l.append(str(rep_d[tax][4] / 2))
-        print_l.append(':'.join(rep_d[tax][5].astype('|S10')))
+        print_l.append(':'.join(rep_d[tax][5].astype('str')))
         print_l.append(str(rep_d[tax][6]))
         print_l.append(str(rep_d[tax][7]))
 
@@ -251,7 +251,7 @@ if __name__ == '__main__':
 
         print_l.append(str(tot_tax_cov))
         print_l.append(str(tot_tax_len))
-        print_l.append(':'.join(cov_array.astype('|S10')))
+        print_l.append(':'.join(cov_array.astype('str')))
 
         stdout.write('\t'.join(print_l) + '\n')
         stderr.write('\t'.join(print_l) + '\n')
